@@ -48,6 +48,7 @@
         function handleDrop(e) {
             const file = e.dataTransfer.files[0];
             if (file && file.name.endsWith('.xlsx')) {
+                dropZone.file = file;
                 displayFileInfo(file);
             } else {
                 alert('请上传 Excel 文件（.xlsx）');
@@ -72,9 +73,31 @@
         }
 
         // 处理按钮点击
-        document.getElementById('confirm-btn').addEventListener('click', () => {
-            // 在这里添加确认处理逻辑
-            console.log('确认上传');
+        document.getElementById('confirm-btn').addEventListener('click', async () => {
+            const file = document.querySelector('#drop-zone').file;
+            if (!file) {
+                alert('请先上传文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    window.location.href = '/process';
+                } else {
+                    alert('上传失败，请重试');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('上传出错，请重试');
+            }
         });
 
         document.getElementById('cancel-btn').addEventListener('click', () => {
