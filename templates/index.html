@@ -8,8 +8,79 @@
 </head>
 <body>
     <div class="container">
-        <h1>欢迎使用</h1>
-        <p>这是一个简单的 Web 应用。</p>
+        <h1>Welcome to the CPU Runner</h1>
+        <p>Drag a file and run the test.</p>
+        
+        <!-- 添加文件拖拽区域 -->
+        <div id="drop-zone" class="drop-zone">
+            <p>将 Excel 文件拖拽到这里</p>
+            <div id="file-info" class="file-info" style="display: none;">
+                <p>文件名：<span id="file-name"></span></p>
+                <p>文件大小：<span id="file-size"></span></p>
+                <p>修改时间：<span id="file-modified"></span></p>
+            </div>
+            <div id="file-actions" class="file-actions" style="display: none;">
+                <button id="confirm-btn">确认</button>
+                <button id="cancel-btn">取消</button>
+            </div>
+        </div>
     </div>
+
+    <!-- 添加 JavaScript -->
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInfo = document.getElementById('file-info');
+        const fileActions = document.getElementById('file-actions');
+
+        // 阻止默认拖拽行为
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 处理文件拖拽
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.xlsx')) {
+                displayFileInfo(file);
+            } else {
+                alert('请上传 Excel 文件（.xlsx）');
+            }
+        }
+
+        function displayFileInfo(file) {
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-size').textContent = formatFileSize(file.size);
+            document.getElementById('file-modified').textContent = new Date(file.lastModified).toLocaleString();
+            
+            fileInfo.style.display = 'block';
+            fileActions.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 处理按钮点击
+        document.getElementById('confirm-btn').addEventListener('click', () => {
+            // 在这里添加确认处理逻辑
+            console.log('确认上传');
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            fileInfo.style.display = 'none';
+            fileActions.style.display = 'none';
+        });
+    </script>
 </body>
 </html>

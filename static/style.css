@@ -17,3 +17,47 @@ body {
 h1 {
     color: #333;
 }
+
+.drop-zone {
+    width: 100%;
+    max-width: 500px;
+    height: 200px;
+    padding: 25px;
+    margin: 20px auto;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.drop-zone:hover {
+    background-color: #f8f8f8;
+    border-color: #999;
+}
+
+.file-info {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.file-actions {
+    margin-top: 20px;
+}
+
+.file-actions button {
+    padding: 8px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#confirm-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#cancel-btn {
+    background-color: #f44336;
+    color: white;
+}
