@@ -41,9 +41,71 @@
         .excel-table tr:hover {
             background-color: #f0f0f0;
         }
+
+        .folder-select-zone {
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .file-actions {
+            margin-top: 10px;
+        }
+
+        .file-actions button {
+            margin: 0 5px;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #folder-confirm-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #folder-cancel-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
+            <!-- Step 2 -->
+            <div class="step-container">
+                <div class="step-header"><h2>Step 2: Select Image Folder</h2></div>
+                <div class="step-content">
+                    <div class="folder-select-zone">
+                        <input type="file" id="folder-input" webkitdirectory directory>
+                        <div id="folder-info" class="file-info" style="display: none;">
+                            <p>文件夹名：<span id="folder-path"></span></p>
+                            <p>文件数量：<span id="file-count"></span></p>
+                        </div>
+                        <div id="folder-actions" class="file-actions" style="display: none;">
+                            <button id="folder-confirm-btn">确认</button>
+                            <button id="folder-cancel-btn">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
     <h2>文件内容</h2>
     <table class="excel-table">
         <thead>
@@ -63,5 +125,30 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        document.getElementById('folder-input').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const folderInfo = document.getElementById('folder-info');
+            const folderActions = document.getElementById('folder-actions');
+            
+            if (files.length > 0) {
+                // 显示文件夹信息
+                document.getElementById('folder-path').textContent = files[0].webkitRelativePath.split('/')[0];
+                document.getElementById('file-count').textContent = files.length;
+                
+                // 显示信息区域和按钮
+                folderInfo.style.display = 'block';
+                folderActions.style.display = 'block';
+            }
+        });
+
+        // 取消按钮事件处理
+        document.getElementById('folder-cancel-btn').addEventListener('click', function() {
+            document.getElementById('folder-input').value = '';
+            document.getElementById('folder-info').style.display = 'none';
+            document.getElementById('folder-actions').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
