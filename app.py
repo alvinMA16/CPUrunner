@@ -25,8 +25,12 @@ def upload_file():
         # 读取Excel文件
         df = pd.read_excel(file)
         
-        # 将数据转换为列表并存储在session中
+        # 获取表头和数据内容
+        headers = df.columns.tolist()
         file_contents = df.values.tolist()
+        
+        # 将表头和数据内容都存储在session中
+        session['headers'] = headers
         session['file_contents'] = file_contents
         
         return jsonify({'message': 'File uploaded successfully'}), 200
@@ -37,8 +41,9 @@ def upload_file():
 
 @app.route('/process')
 def process():
+    headers = session.get('headers', [])
     file_contents = session.get('file_contents', [])
-    return render_template('process.html', file_contents=file_contents)
+    return render_template('process.html', headers=headers, file_contents=file_contents)
 
 @app.route('/')
 def index():

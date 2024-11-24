@@ -19,22 +19,46 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
+        /* 添加新的样式 */
+        .excel-table {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        
+        .excel-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px; /* 设置单元格最大宽度 */
+        }
+
+        .excel-table th {
+            background-color: #E6E6E6;
+            font-weight: bold;
+        }
+
+        .excel-table tr:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
     <h2>文件内容</h2>
-    <table>
+    <table class="excel-table">
         <thead>
             <tr>
-                <th>行号</th>
-                <th>内容</th>
+                {% for cell in headers[0:] %}
+                <th>{{ cell | safe }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for line in file_contents %}
+            {% for row in file_contents[0:] %}
             <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ line }}</td>
+                {% for cell in row %}
+                <td>{{ cell | safe }}</td>
+                {% endfor %}
             </tr>
             {% endfor %}
         </tbody>
