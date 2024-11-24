@@ -5,23 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的 Web 应用</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .step-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .step-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .step-content {
+            margin-left: 20px;
+        }
+
+        .folder-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to the CPU Runner</h1>
-        <p>Drag a file and run the test.</p>
-        
-        <!-- 添加文件拖拽区域 -->
-        <div id="drop-zone" class="drop-zone">
-            <p>将 Excel 文件拖拽到这里</p>
-            <div id="file-info" class="file-info" style="display: none;">
-                <p>文件名：<span id="file-name"></span></p>
-                <p>文件大小：<span id="file-size"></span></p>
-                <p>修改时间：<span id="file-modified"></span></p>
+        <h1>Welcome to the CPU Runner</h1>        
+
+        <!-- Step 1 -->
+        <div class="step-container">
+            <div class="step-header">Step 1: Select Image Folder</div>
+            <div class="step-content">
+                <input type="file" id="folder-input" webkitdirectory directory>
+                <div id="folder-info" class="folder-info" style="display: none;">
+                    <p>Folder name：<span id="folder-path"></span></p>
+                    <p>File count：<span id="file-count"></span></p>
+                </div>
             </div>
-            <div id="file-actions" class="file-actions" style="display: none;">
-                <button id="confirm-btn">确认</button>
-                <button id="cancel-btn">取消</button>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-container">
+            <div class="step-header">Step 2: Select config Files</div>
+            <div class="step-content">
+                
+                <!-- 添加文件拖拽区域 -->
+                <div id="drop-zone" class="drop-zone">
+                    <p>将 Excel 文件拖拽到这里</p>
+                    <div id="file-info" class="file-info" style="display: none;">
+                        <p>文件名：<span id="file-name"></span></p>
+                        <p>文件大小：<span id="file-size"></span></p>
+                        <p>修改时间：<span id="file-modified"></span></p>
+                    </div>
+                    <div id="file-actions" class="file-actions" style="display: none;">
+                        <button id="confirm-btn">确认</button>
+                        <button id="cancel-btn">取消</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -103,6 +151,62 @@
         document.getElementById('cancel-btn').addEventListener('click', () => {
             fileInfo.style.display = 'none';
             fileActions.style.display = 'none';
+        });
+
+        // 处理文件夹选择
+        const folderInput = document.getElementById('folder-input');
+        const folderInfo = document.getElementById('folder-info');
+        const folderActions = document.getElementById('folder-actions');
+
+        folderInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                displayFolderInfo(files);
+            }
+        });
+
+        function displayFolderInfo(files) {
+            const folderPath = files[0].webkitRelativePath.split('/')[0];
+            document.getElementById('folder-path').textContent = folderPath;
+            document.getElementById('file-count').textContent = files.length;
+            
+            folderInfo.style.display = 'block';
+            folderActions.style.display = 'block';
+        }
+
+        // 处理文件夹选择按钮
+        document.getElementById('folder-confirm-btn').addEventListener('click', async () => {
+            const files = document.getElementById('folder-input').files;
+            if (files.length === 0) {
+                alert('请先选择文件夹');
+                return;
+            }
+
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('files[]', file);
+            }
+
+            try {
+                const response = await fetch('/upload-folder', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    window.location.href = '/process';
+                } else {
+                    alert('上传失败，请重试');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('上传出错，请重试');
+            }
+        });
+
+        document.getElementById('folder-cancel-btn').addEventListener('click', () => {
+            folderInfo.style.display = 'none';
+            folderActions.style.display = 'none';
         });
     </script>
 </body>
