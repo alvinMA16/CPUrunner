@@ -95,8 +95,8 @@
                     <div class="folder-select-zone">
                         <input type="file" id="folder-input" webkitdirectory directory>
                         <div id="folder-info" class="file-info" style="display: none;">
-                            <p>文件夹名：<span id="folder-path"></span></p>
-                            <p>文件数量：<span id="file-count"></span></p>
+                            <p>Folder Name：<span id="folder-path"></span></p>
+                            <p>File Count：<span id="file-count"></span></p>
                         </div>
                         <div id="folder-actions" class="file-actions" style="display: none;">
                             <button id="folder-confirm-btn">确认</button>
@@ -106,7 +106,7 @@
                 </div>
             </div>
 
-    <h2>文件内容</h2>
+    <h2>Test Cases</h2>
     <table class="excel-table">
         <thead>
             <tr>
@@ -152,6 +152,9 @@
 
         // 添加确认按钮事件处理
         document.getElementById('folder-confirm-btn').addEventListener('click', function() {
+            // Hide the step container
+            document.querySelector('.step-container').style.display = 'none';
+            
             const files = Array.from(document.getElementById('folder-input').files);
             const screenshotCells = document.querySelectorAll('td:nth-child(5)');
 
