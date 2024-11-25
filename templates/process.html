@@ -230,13 +230,25 @@
                 for (const row of rows) {
                     const cells = row.querySelectorAll('td');
                     
+                    // 获取图片单元格中的图片元素
+                    const imageCell = cells[4]; // 假设图片在第5列
+                    const img = imageCell.querySelector('img');
+                    let imageBase64 = '';
+                    
+                    // 如果存在图片，将其转换为base64
+                    if (img) {
+                        // 从已加载的图片src中获取base64数据
+                        imageBase64 = img.src;
+                        console.log(imageBase64);
+                    }
+                    
                     const rowData = {
                         goal: cells[1].textContent.trim(),
                         model_name: cells[2].textContent.trim(),
-                        prompt: cells[3].textContent.trim()
+                        prompt: cells[3].textContent.trim(),
+                        image: imageBase64  // 添加图片数据
                     };
                     
-                    // Display the request data
                     const decisionCell = cells[cells.length - 2];
                     decisionCell.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">Requesting...</pre>`;
                     

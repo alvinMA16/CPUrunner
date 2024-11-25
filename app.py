@@ -63,22 +63,44 @@ def index():
 def generate_response():
     try:
         data = request.json
+        messages = [
+            {
+                "role": "system",
+                "content": f"Goal: {data['goal']}"
+            }
+        ]
+
+        # 构建用户消息内容
+        user_content = []
+        
+        # 添加文本提示
+        user_content.append({
+            "type": "text",
+            "text": data['prompt']
+        })
+        
+        # 如果存在图片数据，添加图片URL
+        if data.get('image'):
+            user_content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": data['image']
+                }
+            })
+        
+        # 添加用户消息
+        messages.append({
+            "role": "user",
+            "content": user_content
+        })
+
         completion = client.chat.completions.create(
             extra_headers={
                 "HTTP-Referer": request.headers.get('Referer', ''),
                 "X-Title": "AI Test Runner",
             },
             model=data['model_name'],
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"Goal: {data['goal']}"
-                },
-                {
-                    "role": "user",
-                    "content": data['prompt']
-                }
-            ]
+            messages=messages
         )
         return jsonify({
             'response': completion.choices[0].message.content
