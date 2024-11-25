@@ -85,6 +85,33 @@
             width: 100%;
             box-sizing: border-box;
         }
+
+        /* 添加新的样式 */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .run-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .run-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -106,7 +133,11 @@
                 </div>
             </div>
 
-    <h2>Test Cases</h2>
+    <!-- 修改Test Cases标题部分 -->
+    <div class="header-container">
+        <h2>Test Cases</h2>
+        <button id="run-button" class="run-button" style="display: none;">🏃‍♂️ 润！</button>
+    </div>
     <table class="excel-table">
         <thead>
             <tr>
@@ -150,10 +181,12 @@
             document.getElementById('folder-actions').style.display = 'none';
         });
 
-        // 添加确认按钮事件处理
+        // 修改确认按钮事件处理
         document.getElementById('folder-confirm-btn').addEventListener('click', function() {
             // Hide the step container
             document.querySelector('.step-container').style.display = 'none';
+            // Show the run button
+            document.getElementById('run-button').style.display = 'block';
             
             const files = Array.from(document.getElementById('folder-input').files);
             const screenshotCells = document.querySelectorAll('td:nth-child(5)');
