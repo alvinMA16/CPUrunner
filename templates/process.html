@@ -250,9 +250,12 @@
                     };
                     
                     const decisionCell = cells[cells.length - 2];
+                    const latencyCell = cells[cells.length - 1];  // 获取 latency 单元格
                     decisionCell.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">Requesting...</pre>`;
+                    latencyCell.textContent = 'Pending...';  // 显示等待状态
                     
                     try {
+                        const startTime = performance.now();  // 开始计时
                         const response = await fetch('/generate', {
                             method: 'POST',
                             headers: {
@@ -262,14 +265,20 @@
                         });
                         
                         const result = await response.json();
+                        const endTime = performance.now();  // 结束计时
                         
                         if (response.ok) {
                             decisionCell.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">${result.response}</pre>`;
+                            // 计算并显示耗时（精确到0.01秒）
+                            const latency = ((endTime - startTime) / 1000).toFixed(2);
+                            latencyCell.textContent = `${latency}s`;
                         } else {
                             decisionCell.innerHTML = `<pre style="color: red; margin: 0; white-space: pre-wrap;">Error: ${result.error}</pre>`;
+                            latencyCell.textContent = 'NA';  // 请求失败显示 NA
                         }
                     } catch (error) {
                         decisionCell.innerHTML = `<pre style="color: red; margin: 0; white-space: pre-wrap;">Error: ${error.message}</pre>`;
+                        latencyCell.textContent = 'NA';  // 发生错误显示 NA
                     }
                 }
                 
