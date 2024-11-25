@@ -1,9 +1,19 @@
 from flask import Flask, request, render_template, session, jsonify
+from openai import OpenAI
 import pandas as pd
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # 加载 .env 文件
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # 设置一个安全的密钥
+
+# Initialize OpenAI client
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv('OPENROUTER_API_KEY')
+)
 
 UPLOAD_FOLDER = 'uploads'  # 创建上传文件夹
 if not os.path.exists(UPLOAD_FOLDER):
@@ -48,6 +58,33 @@ def process():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/generate', methods=['POST'])
+def generate_response():
+    try:
+        data = request.json
+        completion = client.chat.completions.create(
+            extra_headers={
+                "HTTP-Referer": request.headers.get('Referer', ''),
+                "X-Title": "AI Test Runner",
+            },
+            model=data['model_name'],
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"Goal: {data['goal']}"
+                },
+                {
+                    "role": "user",
+                    "content": data['prompt']
+                }
+            ]
+        )
+        return jsonify({
+            'response': completion.choices[0].message.content
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -216,6 +216,61 @@
                 }
             });
         });
+
+        // 添加 run-button 点击事件处理
+        document.getElementById('run-button').addEventListener('click', async function() {
+            const table = document.querySelector('.excel-table');
+            const rows = table.querySelectorAll('tbody tr');
+            
+            // Disable the button immediately
+            this.disabled = true;
+            this.textContent = '🤔 思考中...';
+            
+            try {
+                for (const row of rows) {
+                    const cells = row.querySelectorAll('td');
+                    
+                    const rowData = {
+                        goal: cells[1].textContent.trim(),
+                        model_name: cells[2].textContent.trim(),
+                        prompt: cells[3].textContent.trim()
+                    };
+                    
+                    // Display the request data
+                    const decisionCell = cells[cells.length - 2];
+                    decisionCell.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">Requesting...</pre>`;
+                    
+                    try {
+                        const response = await fetch('/generate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(rowData)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            decisionCell.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">${result.response}</pre>`;
+                        } else {
+                            decisionCell.innerHTML = `<pre style="color: red; margin: 0; white-space: pre-wrap;">Error: ${result.error}</pre>`;
+                        }
+                    } catch (error) {
+                        decisionCell.innerHTML = `<pre style="color: red; margin: 0; white-space: pre-wrap;">Error: ${error.message}</pre>`;
+                    }
+                }
+                
+                // Update button state after all processing is complete
+                this.textContent = '✅ 已经润了！';
+                this.style.backgroundColor = '#45a049';
+            } catch (error) {
+                // Handle any overall errors
+                this.textContent = '❌ 出错了！';
+                this.style.backgroundColor = '#f44336';
+                console.error('Error:', error);
+            }
+        });
     </script>
 </body>
 </html>
