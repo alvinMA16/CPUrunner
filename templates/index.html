@@ -143,61 +143,7 @@
             fileActions.style.display = 'none';
         });
 
-        // 处理文件夹选择
-        const folderInput = document.getElementById('folder-input');
-        const folderInfo = document.getElementById('folder-info');
-        const folderActions = document.getElementById('folder-actions');
-
-        folderInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            if (files.length > 0) {
-                displayFolderInfo(files);
-            }
-        });
-
-        function displayFolderInfo(files) {
-            const folderPath = files[0].webkitRelativePath.split('/')[0];
-            document.getElementById('folder-path').textContent = folderPath;
-            document.getElementById('file-count').textContent = files.length;
-            
-            folderInfo.style.display = 'block';
-            folderActions.style.display = 'block';
-        }
-
-        // 处理文件夹选择按钮
-        document.getElementById('folder-confirm-btn').addEventListener('click', async () => {
-            const files = document.getElementById('folder-input').files;
-            if (files.length === 0) {
-                alert('请先选择文件夹');
-                return;
-            }
-
-            const formData = new FormData();
-            for (let file of files) {
-                formData.append('files[]', file);
-            }
-
-            try {
-                const response = await fetch('/upload-folder', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    window.location.href = '/process';
-                } else {
-                    alert('上传失败，请重试');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('上传出错，请重试');
-            }
-        });
-
-        document.getElementById('folder-cancel-btn').addEventListener('click', () => {
-            folderInfo.style.display = 'none';
-            folderActions.style.display = 'none';
-        });
+        
     </script>
 </body>
 </html>
