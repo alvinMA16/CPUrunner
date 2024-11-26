@@ -9,12 +9,6 @@ load_dotenv()  # 加载 .env 文件
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # 设置一个安全的密钥
 
-# Initialize OpenAI client
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv('OPENROUTER_API_KEY')
-)
-
 UPLOAD_FOLDER = 'uploads'  # 创建上传文件夹
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -63,48 +57,83 @@ def index():
 def generate_response():
     try:
         data = request.json
-        messages = [
-            {
-                "role": "system",
-                "content": f"Goal: {data['goal']}"
-            }
-        ]
+        model_name = data['model_name']
 
-        # 构建用户消息内容
-        user_content = []
-        
-        # 添加文本提示
-        user_content.append({
-            "type": "text",
-            "text": data['prompt']
-        })
-        
-        # 如果存在图片数据，添加图片URL
-        if data.get('image'):
-            user_content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": data['image']
+        if model_name == "openai/gpt-4o-2024-11-20":
+            # Initialize OpenAI client
+            openrouter_client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=os.getenv('OPENROUTER_API_KEY')
+            )
+            # OpenRouter API 调用方式
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"Goal: {data['goal']}"
                 }
-            })
-        
-        # 添加用户消息
-        messages.append({
-            "role": "user",
-            "content": user_content
-        })
+            ]
 
-        completion = client.chat.completions.create(
-            extra_headers={
-                "HTTP-Referer": request.headers.get('Referer', ''),
-                "X-Title": "AI Test Runner",
-            },
-            model=data['model_name'],
-            messages=messages
-        )
+            user_content = []
+            user_content.append({
+                "type": "text",
+                "text": data['prompt']
+            })
+            
+            if data.get('image'):
+                user_content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": data['image']
+                    }
+                })
+
+            messages.append({
+                "role": "user",
+                "content": user_content
+            })
+            
+            completion = openrouter_client.chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": request.headers.get('Referer', ''),
+                    "X-Title": "AI Test Runner",
+                },
+                model=model_name,
+                messages=messages
+            )
+            response_content = completion.choices[0].message.content
+            
+        elif model_name == "claude-3.5-sonnet":
+            # 使用 Anthropic API 客户端
+            anthropic_client = OpenAI(
+                base_url="https://api.anthropic.com/v1",
+                api_key=os.getenv('ANTHROPIC_API_KEY')
+            )
+            
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"Goal: {data['goal']}"
+                },
+                {
+                    "role": "user",
+                    "content": data['prompt']
+                }
+            ]
+            
+            completion = anthropic_client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                max_tokens=4096
+            )
+            response_content = completion.choices[0].message.content
+            
+        else:
+            return jsonify({'error': 'Unsupported model'}), 400
+
         return jsonify({
-            'response': completion.choices[0].message.content
+            'response': response_content
         })
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
