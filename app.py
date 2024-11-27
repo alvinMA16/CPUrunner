@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+import anthropic  # Add this import at the top
 
 load_dotenv()  # 加载 .env 文件
 
@@ -126,30 +127,36 @@ def generate_response():
             )
             response_content = completion.choices[0].message.content
             
-        elif model_name == "claude-3.5-sonnet":
-            # 使用 Anthropic API 客户端
-            anthropic_client = OpenAI(
-                base_url="https://api.anthropic.com/v1",
+        elif model_name == "claude-3-5-sonnet-latest":  # Updated model name
+            # Initialize Anthropic client
+            client = anthropic.Anthropic(
                 api_key=os.getenv('ANTHROPIC_API_KEY')
             )
             
-            messages = [
-                {
-                    "role": "system",
-                    "content": f"Goal: {data['goal']}"
-                },
-                {
-                    "role": "user",
-                    "content": data['prompt']
-                }
-            ]
+            # Prepare message content
+            user_content = []
             
-            completion = anthropic_client.chat.completions.create(
+            
+            user_content.append({
+                "type": "text",
+                "text": data['prompt']
+            })
+            print(user_content)
+
+            # Create message
+            completion = client.messages.create(
                 model=model_name,
-                messages=messages,
-                max_tokens=4096
+                max_tokens=4096,
+                system=f"Goal: {data['goal']}",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": user_content
+                    }
+                ]
             )
-            response_content = completion.choices[0].message.content
+            
+            response_content = completion.content[0].text
             
         else:
             return jsonify({'error': 'Unsupported model'}), 400
