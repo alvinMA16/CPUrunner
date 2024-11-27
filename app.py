@@ -3,6 +3,9 @@ from openai import OpenAI
 import pandas as pd
 import os
 from dotenv import load_dotenv
+import time
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 load_dotenv()  # 加载 .env 文件
 
@@ -26,16 +29,12 @@ def upload_file():
         return jsonify({'error': 'Invalid file type'}), 400
 
     try:
-        # 读取Excel文件
-        df = pd.read_excel(file)
+        # 保存文件到临时目录
+        file_path = os.path.join(UPLOAD_FOLDER, f"{session.get('_id', os.urandom(16).hex())}.xlsx")
+        file.save(file_path)
         
-        # 获取表头和数据内容
-        headers = df.columns.tolist()
-        file_contents = df.values.tolist()
-        
-        # 将表头和数据内容都存储在session中
-        session['headers'] = headers
-        session['file_contents'] = file_contents
+        # 只在 session 中存储文件路径
+        session['file_path'] = file_path
         
         return jsonify({'message': 'File uploaded successfully'}), 200
     
@@ -45,9 +44,34 @@ def upload_file():
 
 @app.route('/process')
 def process():
-    headers = session.get('headers', [])
-    file_contents = session.get('file_contents', [])
+    file_path = session.get('file_path')
+    if not file_path or not os.path.exists(file_path):
+        return "No file found", 404
+        
+    # 读取文件时再处理数据
+    df = pd.read_excel(file_path)
+    headers = df.columns.tolist()
+    file_contents = df.values.tolist()
+    
     return render_template('process.html', headers=headers, file_contents=file_contents)
+
+# 添加清理函数
+def cleanup_old_files():
+    """清理超过24小时的临时文件"""
+    current_time = time.time()
+    for filename in os.listdir(UPLOAD_FOLDER):
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        # 如果文件超过24小时
+        if os.path.getmtime(file_path) < current_time - 86400:  # 86400 秒 = 24 小时
+            os.remove(file_path)
+
+# 在应用启动时添加定时清理任务
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=cleanup_old_files, trigger="interval", hours=24)
+scheduler.start()
+
+# 在应用退出时停止调度器
+atexit.register(lambda: scheduler.shutdown())
 
 @app.route('/')
 def index():

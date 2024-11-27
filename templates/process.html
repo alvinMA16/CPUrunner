@@ -140,6 +140,11 @@
             max-height: 90vh;
             object-fit: contain;
         }
+
+        .empty-cell {
+            color: #999;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -176,16 +181,23 @@
     <table class="excel-table">
         <thead>
             <tr>
-                {% for cell in headers[0:] %}
+                {% for cell in headers %}
                 <th>{{ cell | safe }}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for row in file_contents[0:] %}
+            {% for row in file_contents %}
             <tr>
                 {% for cell in row %}
-                <td>{{ cell | safe }}</td>
+                <td>
+                    {% if cell is none %}
+                        <!-- 处理空值 -->
+                        <span class="empty-cell">-</span>
+                    {% else %}
+                        {{ cell | safe }}
+                    {% endif %}
+                </td>
                 {% endfor %}
             </tr>
             {% endfor %}
